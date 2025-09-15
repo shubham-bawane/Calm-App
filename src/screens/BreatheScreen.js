@@ -188,29 +188,13 @@ export default function BreatheScreen({ navigation }) {
     });
   };
 
-  // FIXED: Helper function for haptic feedback with settings check
+  // FIXED: Helper functions using centralized haptics manager
   const triggerInhaleHaptic = async () => {
-    if (settings.hapticsEnabled !== false) { // Default to enabled
-      try {
-        if (Platform.OS !== 'web') {
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-      } catch (error) {
-        if (__DEV__) console.warn('Haptic feedback failed:', error);
-      }
-    }
+    await hapticsManager.triggerInhaleHaptic(settings.hapticsEnabled !== false);
   };
 
   const triggerExhaleHaptic = async () => {
-    if (settings.hapticsEnabled !== false) { // Default to enabled
-      try {
-        if (Platform.OS !== 'web') {
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-      } catch (error) {
-        if (__DEV__) console.warn('Haptic feedback failed:', error);
-      }
-    }
+    await hapticsManager.triggerExhaleHaptic(settings.hapticsEnabled !== false);
   };
 
   // FIXED: Complete breathing cycle implementation using withSequence
