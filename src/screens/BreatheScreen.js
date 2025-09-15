@@ -50,6 +50,8 @@ export default function BreatheScreen({ navigation }) {
   const [isRunning, setIsRunning] = useState(false);
   const [showStop, setShowStop] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState(null);
+  // FIXED: Add live countdown timer state
+  const [countdown, setCountdown] = useState(0);
 
   const { addBreathingSession, settings } = useAppStore();
   
@@ -57,8 +59,9 @@ export default function BreatheScreen({ navigation }) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0.8);
   
-  // Animation refs for cleanup
-  const animationRefs = React.useRef([]);
+  // FIXED: Timer refs for proper cleanup
+  const timerRefs = React.useRef([]);
+  const countdownInterval = React.useRef(null);
 
   // FIXED: Cleanup on unmount to prevent memory leaks
   useEffect(() => {
