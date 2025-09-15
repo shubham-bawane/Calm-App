@@ -67,6 +67,7 @@ export default function BreatheScreen({ navigation }) {
   useEffect(() => {
     return () => {
       if (__DEV__) console.warn('🧹 Cleaning up breathing screen');
+      clearAllTimers();
       cancelAnimation(scale);
       cancelAnimation(opacity);
     };
