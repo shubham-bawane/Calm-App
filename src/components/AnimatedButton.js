@@ -53,7 +53,7 @@ export default function AnimatedButton({
     opacity.value = withTiming(0.8, { duration: 150 });
     
     if (hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      hapticsManager.triggerLight();
     }
   };
 
