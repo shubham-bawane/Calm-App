@@ -217,6 +217,74 @@ export default function SettingsScreen({ navigation }) {
             />
           </View>
 
+          {/* FIXED: Dev Data Inspector (dev only) */}
+          {__DEV__ && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Development Tools</Text>
+              
+              <SettingRow
+                title="Data Inspector"
+                subtitle="View locally stored data (dev mode only)"
+                value={showDevInspector}
+                onValueChange={setShowDevInspector}
+                type="switch"
+              />
+              
+              {showDevInspector && (
+                <View style={styles.devInspector}>
+                  <Text style={styles.devInspectorTitle}>📊 Local Data Status</Text>
+                  
+                  {/* Mood Calibration Status */}
+                  <View style={styles.devInspectorSection}>
+                    <Text style={styles.devInspectorLabel}>🧠 Mood Calibration:</Text>
+                    {moodCalibration ? (
+                      <View>
+                        <Text style={styles.devInspectorValue}>
+                          Mood: {moodCalibration.mood} ({Math.round(moodCalibration.confidence * 100)}% confidence)
+                        </Text>
+                        <Text style={styles.devInspectorValue}>
+                          Timestamp: {new Date(moodCalibration.timestamp).toLocaleString()}
+                        </Text>
+                        <Text style={styles.devInspectorValue}>
+                          Vector: {JSON.stringify(moodCalibration.vector || moodCalibration.scores)}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.devInspectorValue}>Not calibrated</Text>
+                    )}
+                  </View>
+                  
+                  {/* Habit Progress Status */}
+                  <View style={styles.devInspectorSection}>
+                    <Text style={styles.devInspectorLabel}>🌱 Habit Progress:</Text>
+                    <Text style={styles.devInspectorValue}>
+                      Level: {habitProgress.level} | Growth Points: {habitProgress.growthPoints}
+                    </Text>
+                    <Text style={styles.devInspectorValue}>
+                      Completed Today: {habitProgress.completedToday.length}
+                    </Text>
+                  </View>
+                  
+                  {/* Latest Mood Inference */}
+                  <View style={styles.devInspectorSection}>
+                    <Text style={styles.devInspectorLabel}>🎯 Latest Mood Inference:</Text>
+                    {lastMoodInference ? (
+                      <Text style={styles.devInspectorValue}>
+                        {lastMoodInference.mood} ({Math.round(lastMoodInference.confidence * 100)}%)
+                      </Text>
+                    ) : (
+                      <Text style={styles.devInspectorValue}>No recent inference</Text>
+                    )}
+                  </View>
+                  
+                  <Text style={styles.devInspectorFooter}>
+                    ℹ️ All data stored in AsyncStorage locally
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
           {/* App Info */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
