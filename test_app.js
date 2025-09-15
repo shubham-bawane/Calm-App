@@ -22,6 +22,7 @@ const requiredFiles = [
   'src/services/moodInference.js',
   'src/utils/soundManager.js',
   'src/utils/notifications.js',
+  'src/utils/hapticsManager.js',
 ];
 
 let allFilesExist = true;
