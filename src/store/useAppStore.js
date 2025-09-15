@@ -121,12 +121,31 @@ export const useAppStore = create((set, get) => ({
   },
 
   saveMoodCalibration: async (calibration) => {
+    // All user data persisted locally in AsyncStorage by design. No remote calls.
     set({ moodCalibration: calibration });
     await AsyncStorage.setItem(STORAGE_KEYS.MOOD_CALIBRATION, JSON.stringify(calibration));
+    
+    if (__DEV__) {
+      console.warn('💾 Mood calibration saved locally:', {
+        mood: calibration.mood,
+        confidence: Math.round(calibration.confidence * 100) + '%',
+        timestamp: new Date(calibration.timestamp).toLocaleString(),
+        storage: 'AsyncStorage (@calmapp:moodCalibration)'
+      });
+    }
   },
 
-  updateMoodInference: (inference) => {
+  updateMoodInference: async (inference) => {
+    // FIXED: Also persist mood inference results to AsyncStorage
     set({ lastMoodInference: inference });
+    await AsyncStorage.setItem('mood_inference_latest', JSON.stringify(inference));
+    
+    if (__DEV__) {
+      console.warn('🧠 Latest mood inference updated:', {
+        mood: inference.mood,
+        storage: 'AsyncStorage (mood_inference_latest)'
+      });
+    }
   },
 
   // Load data from storage
