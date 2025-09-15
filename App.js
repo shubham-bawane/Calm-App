@@ -67,6 +67,7 @@ export default function App() {
           <Stack.Screen name="Journal" component={JournalScreen} />
           <Stack.Screen name="SessionSummary" component={SessionSummaryScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="MoodCalibration" component={MoodCalibrationScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
