@@ -566,4 +566,70 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: theme.spacing.sm,
   },
+  // FIXED: Breathing History styles - calm and minimal
+  historyContainer: {
+    marginTop: theme.spacing.sm,
+  },
+  historyCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    ...theme.shadows.soft,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  historyDate: {
+    ...theme.typography.small,
+    color: theme.colors.mutedText,
+    opacity: 0.7,
+  },
+  completedBadge: {
+    fontSize: 16,
+    color: theme.colors.accent,
+  },
+  historyDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  historycycles: {
+    ...theme.typography.body,
+    color: theme.colors.mutedText,
+    fontWeight: '500',
+  },
+  historyDuration: {
+    ...theme.typography.small,
+    color: theme.colors.mutedText,
+    opacity: 0.8,
+  },
+  historyMore: {
+    ...theme.typography.small,
+    color: theme.colors.accent,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: theme.spacing.sm,
+  },
+  emptyHistory: {
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: theme.borderRadius.md,
+    marginTop: theme.spacing.sm,
+  },
+  emptyHistoryText: {
+    ...theme.typography.body,
+    color: theme.colors.mutedText,
+    marginBottom: theme.spacing.xs,
+  },
+  emptyHistorySubtext: {
+    ...theme.typography.small,
+    color: theme.colors.mutedText,
+    opacity: 0.7,
+    textAlign: 'center',
+  },
 });
