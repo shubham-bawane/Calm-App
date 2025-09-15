@@ -244,14 +244,16 @@ export default function MoodCalibrationScreen({ navigation }) {
     await saveMoodCalibration(result);
     updateMoodInference(result);
     
-    // DEBUG: Confirm mood calibration is working and stored locally
-    console.log('🧠 Mood Calibration Saved:', {
-      mood: result.mood,
-      confidence: Math.round(result.confidence * 100) + '%',
-      isConfident: result.isConfident,
-      storage: 'LOCAL_ONLY (AsyncStorage)',
-      touchDataPoints: Object.keys(result.features).length
-    });
+    // FIXED: Debug logging in dev mode only
+    if (__DEV__) {
+      console.warn('🧠 Mood Calibration Saved:', {
+        mood: result.mood,
+        confidence: Math.round(result.confidence * 100) + '%',
+        isConfident: result.isConfident,
+        storage: 'LOCAL_ONLY (AsyncStorage)',
+        touchDataPoints: Object.keys(result.features).length
+      });
+    }
   };
 
   const handleFinish = () => {
