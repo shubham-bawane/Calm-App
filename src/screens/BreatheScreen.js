@@ -1,3 +1,12 @@
+/**
+ * BREATHING SCREEN - PRIVACY-FIRST MINDFUL BREATHING
+ * 
+ * Implements precise breathing cycles with haptic feedback and animations.
+ * Session data (duration, cycles) stored locally in AsyncStorage only.
+ * NO external services, analytics, or data transmission.
+ * Uses theme.breathingConfig for customizable timing.
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
