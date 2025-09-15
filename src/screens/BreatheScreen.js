@@ -554,4 +554,14 @@ const styles = StyleSheet.create({
     color: theme.colors.mutedText,
     opacity: 0.7,
   },
+  // FIXED: Live countdown timer styling - large, calm, prominent
+  countdownText: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: theme.colors.accent,
+    textAlign: 'center',
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    letterSpacing: 1,
+  },
 });
