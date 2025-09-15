@@ -125,48 +125,54 @@ export default function BreatheScreen({ navigation }) {
       }, breathingConfig.inhale);
     }
 
-    // Inhale phase
-    runOnJS(setCurrentPhase)(BREATHING_PHASES.INHALE);
-    scale.value = withTiming(1.18, {
-      duration: breathingConfig.inhale,
-    });
-    
-    // Haptic feedback for inhale
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // FIXED: Reset to baseline before starting each cycle
+    scale.value = withTiming(1.0, { duration: 500 }, () => {
+      // Inhale phase - expand circle
+      runOnJS(setCurrentPhase)(BREATHING_PHASES.INHALE);
+      scale.value = withTiming(1.18, {
+        duration: breathingConfig.inhale,
+      });
+      
+      // Haptic feedback for inhale
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    setTimeout(() => {
-      if (!isRunning) return;
-      
-      // Hold phase
-      runOnJS(setCurrentPhase)(BREATHING_PHASES.HOLD);
-      
       setTimeout(() => {
         if (!isRunning) return;
         
-        // Exhale phase
-        runOnJS(setCurrentPhase)(BREATHING_PHASES.EXHALE);
-        scale.value = withTiming(0.92, {
-          duration: breathingConfig.exhale,
-        });
-        
-        // Haptic feedback for exhale
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        // Hold phase - maintain size
+        runOnJS(setCurrentPhase)(BREATHING_PHASES.HOLD);
         
         setTimeout(() => {
           if (!isRunning) return;
           
-          // Pause and next cycle
-          runOnJS(setCurrentPhase)(BREATHING_PHASES.PAUSE);
-          runOnJS(setCurrentCycle)(currentCycle + 1);
+          // Exhale phase - contract circle
+          runOnJS(setCurrentPhase)(BREATHING_PHASES.EXHALE);
+          scale.value = withTiming(0.92, {
+            duration: breathingConfig.exhale,
+          });
+          
+          // Haptic feedback for exhale
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           
           setTimeout(() => {
-            if (isRunning) {
-              runOnJS(runBreathingCycle)();
-            }
-          }, 1000);
-        }, breathingConfig.exhale);
-      }, breathingConfig.hold);
-    }, breathingConfig.inhale);
+            if (!isRunning) return;
+            
+            // Return to resting state before next cycle
+            scale.value = withTiming(1.0, { duration: 1000 }, () => {
+              runOnJS(setCurrentPhase)(BREATHING_PHASES.PAUSE);
+              runOnJS(setCurrentCycle)(currentCycle + 1);
+              
+              // Brief pause before next cycle
+              setTimeout(() => {
+                if (isRunning) {
+                  runOnJS(runBreathingCycle)();
+                }
+              }, 500);
+            });
+          }, breathingConfig.exhale);
+        }, breathingConfig.hold);
+      }, breathingConfig.inhale);
+    });
   };
 
   // Phase instruction text
