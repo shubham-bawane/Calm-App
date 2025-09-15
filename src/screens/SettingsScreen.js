@@ -168,6 +168,55 @@ export default function SettingsScreen({ navigation }) {
             />
           </View>
 
+          {/* FIXED: Breathing History Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Breathing History</Text>
+            
+            {breathingSessions && breathingSessions.length > 0 ? (
+              <View style={styles.historyContainer}>
+                {breathingSessions.slice(-5).reverse().map((session, index) => (
+                  <View key={index} style={styles.historyCard}>
+                    <View style={styles.historyHeader}>
+                      <Text style={styles.historyDate}>
+                        {new Date(session.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}
+                      </Text>
+                      {session.completed && (
+                        <Text style={styles.completedBadge}>✓</Text>
+                      )}
+                    </View>
+                    <View style={styles.historyDetails}>
+                      <Text style={styles.historycycles}>
+                        {session.cycles} cycles
+                      </Text>
+                      <Text style={styles.historyDuration}>
+                        {Math.round(session.duration / 1000 / 60)}m {Math.round((session.duration / 1000) % 60)}s
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+                {breathingSessions.length > 5 && (
+                  <Text style={styles.historyMore}>
+                    + {breathingSessions.length - 5} more sessions
+                  </Text>
+                )}
+              </View>
+            ) : (
+              <View style={styles.emptyHistory}>
+                <Text style={styles.emptyHistoryText}>
+                  🌊 No breathing sessions yet
+                </Text>
+                <Text style={styles.emptyHistorySubtext}>
+                  Complete your first breathing exercise to see your history
+                </Text>
+              </View>
+            )}
+          </View>
+
           {/* Mood Inference Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Mood Awareness</Text>
