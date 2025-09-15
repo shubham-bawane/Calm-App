@@ -1,0 +1,173 @@
+import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const STORAGE_KEYS = {
+  JOURNAL_ENTRIES: 'journal_entries',
+  HABIT_PROGRESS: 'habit_progress',
+  SETTINGS: 'settings',
+  MOOD_CALIBRATION: 'mood_calibration',
+  BREATHING_SESSIONS: 'breathing_sessions',
+};
+
+export const useAppStore = create((set, get) => ({
+  // App Settings
+  settings: {
+    soundEnabled: false,
+    notificationsEnabled: false,
+    maxNotificationsPerDay: 3,
+    reduceMotion: false,
+    theme: 'default',
+    cloudSyncEnabled: false,
+  },
+
+  // Journal State
+  journalEntries: [],
+  currentMood: null,
+
+  // Habit State
+  habitProgress: {
+    level: 1,
+    growthPoints: 0,
+    completedToday: [],
+  },
+
+  // Breathing State
+  breathingSessions: [],
+  currentBreathingSession: null,
+
+  // Mood Inference State
+  moodCalibration: null,
+  lastMoodInference: null,
+
+  // Actions
+  updateSettings: async (newSettings) => {
+    const updatedSettings = { ...get().settings, ...newSettings };
+    set({ settings: updatedSettings });
+    await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updatedSettings));
+  },
+
+  addJournalEntry: async (entry) => {
+    const newEntry = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      mood: entry.mood,
+      text: entry.text || '',
+      timestamp: Date.now(),
+    };
+    
+    const updatedEntries = [...get().journalEntries, newEntry];
+    set({ journalEntries: updatedEntries });
+    await AsyncStorage.setItem(STORAGE_KEYS.JOURNAL_ENTRIES, JSON.stringify(updatedEntries));
+  },
+
+  completeHabit: async (habitId) => {
+    const today = new Date().toDateString();
+    const currentProgress = get().habitProgress;
+    
+    if (!currentProgress.completedToday.includes(habitId)) {
+      const updatedProgress = {
+        ...currentProgress,
+        completedToday: [...currentProgress.completedToday, habitId],
+        growthPoints: currentProgress.growthPoints + 1,
+        level: Math.floor((currentProgress.growthPoints + 1) / 10) + 1,
+      };
+      
+      set({ habitProgress: updatedProgress });
+      await AsyncStorage.setItem(STORAGE_KEYS.HABIT_PROGRESS, JSON.stringify(updatedProgress));
+    }
+  },
+
+  addBreathingSession: async (session) => {
+    const newSession = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      duration: session.duration,
+      cycles: session.cycles,
+      completed: session.completed,
+      timestamp: Date.now(),
+    };
+    
+    const updatedSessions = [...get().breathingSessions, newSession];
+    set({ breathingSessions: updatedSessions });
+    await AsyncStorage.setItem(STORAGE_KEYS.BREATHING_SESSIONS, JSON.stringify(updatedSessions));
+  },
+
+  saveMoodCalibration: async (calibration) => {
+    set({ moodCalibration: calibration });
+    await AsyncStorage.setItem(STORAGE_KEYS.MOOD_CALIBRATION, JSON.stringify(calibration));
+  },
+
+  updateMoodInference: (inference) => {
+    set({ lastMoodInference: inference });
+  },
+
+  // Load data from storage
+  loadStoredData: async () => {
+    try {
+      const [settings, journalEntries, habitProgress, moodCalibration, breathingSessions] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
+        AsyncStorage.getItem(STORAGE_KEYS.JOURNAL_ENTRIES),
+        AsyncStorage.getItem(STORAGE_KEYS.HABIT_PROGRESS),
+        AsyncStorage.getItem(STORAGE_KEYS.MOOD_CALIBRATION),
+        AsyncStorage.getItem(STORAGE_KEYS.BREATHING_SESSIONS),
+      ]);
+
+      set({
+        settings: settings ? JSON.parse(settings) : get().settings,
+        journalEntries: journalEntries ? JSON.parse(journalEntries) : [],
+        habitProgress: habitProgress ? JSON.parse(habitProgress) : get().habitProgress,
+        moodCalibration: moodCalibration ? JSON.parse(moodCalibration) : null,
+        breathingSessions: breathingSessions ? JSON.parse(breathingSessions) : [],
+      });
+    } catch (error) {
+      console.error('Error loading stored data:', error);
+    }
+  },
+
+  // Export data
+  exportData: async () => {
+    const state = get();
+    const exportData = {
+      journalEntries: state.journalEntries,
+      habitProgress: state.habitProgress,
+      breathingSessions: state.breathingSessions,
+      settings: state.settings,
+      exportDate: new Date().toISOString(),
+    };
+    return JSON.stringify(exportData, null, 2);
+  },
+
+  // Clear all data
+  clearAllData: async () => {
+    await Promise.all([
+      AsyncStorage.removeItem(STORAGE_KEYS.JOURNAL_ENTRIES),
+      AsyncStorage.removeItem(STORAGE_KEYS.HABIT_PROGRESS),
+      AsyncStorage.removeItem(STORAGE_KEYS.SETTINGS),
+      AsyncStorage.removeItem(STORAGE_KEYS.MOOD_CALIBRATION),
+      AsyncStorage.removeItem(STORAGE_KEYS.BREATHING_SESSIONS),
+    ]);
+    
+    // Reset to initial state
+    set({
+      settings: {
+        soundEnabled: false,
+        notificationsEnabled: false,
+        maxNotificationsPerDay: 3,
+        reduceMotion: false,
+        theme: 'default',
+        cloudSyncEnabled: false,
+      },
+      journalEntries: [],
+      currentMood: null,
+      habitProgress: {
+        level: 1,
+        growthPoints: 0,
+        completedToday: [],
+      },
+      breathingSessions: [],
+      currentBreathingSession: null,
+      moodCalibration: null,
+      lastMoodInference: null,
+    });
+  },
+}));

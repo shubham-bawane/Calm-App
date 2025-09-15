@@ -1,20 +1,73 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+// Screens
+import HomeScreen from './src/screens/HomeScreen';
+import BreatheScreen from './src/screens/BreatheScreen';
+import HabitScreen from './src/screens/HabitScreen';
+import JournalScreen from './src/screens/JournalScreen';
+import SessionSummaryScreen from './src/screens/SessionSummaryScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+
+// Theme and Config
+import { theme } from './src/config/theme';
+
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <StatusBar style="dark" backgroundColor={theme.colors.bg1} />
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerShown: false,
+            cardStyleInterpolator: ({ current, next, layouts }) => {
+              return {
+                cardStyle: {
+                  transform: [
+                    {
+                      translateX: current.progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [layouts.screen.width, 0],
+                      }),
+                    },
+                  ],
+                  opacity: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              };
+            },
+            transitionSpec: {
+              open: {
+                animation: 'timing',
+                config: {
+                  duration: 400,
+                },
+              },
+              close: {
+                animation: 'timing',
+                config: {
+                  duration: 400,
+                },
+              },
+            },
+          }}
+        >
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Breathe" component={BreatheScreen} />
+          <Stack.Screen name="Habit" component={HabitScreen} />
+          <Stack.Screen name="Journal" component={JournalScreen} />
+          <Stack.Screen name="SessionSummary" component={SessionSummaryScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
