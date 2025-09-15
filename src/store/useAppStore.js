@@ -1,6 +1,22 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**
+ * PRIVACY-FIRST DATA STORE
+ * 
+ * This store manages ALL app data using LOCAL AsyncStorage only.
+ * 
+ * CRITICAL PRIVACY GUARANTEES:
+ * - Journal entries: Stored locally, never transmitted
+ * - Habit progress: Private tracking, local persistence only  
+ * - Breathing sessions: Personal wellness data, device-only storage
+ * - Mood calibration: Sensitive emotional data, local processing only
+ * - Settings: User preferences, local storage only
+ * 
+ * NO external APIs, NO analytics, NO cloud sync by default.
+ * User has full control and can export/delete all data.
+ */
+
 const STORAGE_KEYS = {
   JOURNAL_ENTRIES: 'journal_entries',
   HABIT_PROGRESS: 'habit_progress',
