@@ -478,4 +478,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: theme.spacing.xs,
   },
+  // FIXED: Dev inspector styles
+  devInspector: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  devInspectorTitle: {
+    ...theme.typography.body,
+    color: theme.colors.mutedText,
+    fontWeight: '600',
+    marginBottom: theme.spacing.md,
+  },
+  devInspectorSection: {
+    marginBottom: theme.spacing.md,
+  },
+  devInspectorLabel: {
+    ...theme.typography.small,
+    color: theme.colors.mutedText,
+    fontWeight: '600',
+    marginBottom: theme.spacing.xs,
+  },
+  devInspectorValue: {
+    ...theme.typography.small,
+    color: theme.colors.mutedText,
+    opacity: 0.8,
+    fontFamily: 'monospace',
+    marginBottom: theme.spacing.xs,
+  },
+  devInspectorFooter: {
+    ...theme.typography.small,
+    color: theme.colors.accent,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: theme.spacing.sm,
+  },
 });
