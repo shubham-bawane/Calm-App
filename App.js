@@ -11,6 +11,7 @@ import HabitScreen from './src/screens/HabitScreen';
 import JournalScreen from './src/screens/JournalScreen';
 import SessionSummaryScreen from './src/screens/SessionSummaryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import MoodCalibrationScreen from './src/screens/MoodCalibrationScreen';
 
 // Theme and Config
 import { theme } from './src/config/theme';
