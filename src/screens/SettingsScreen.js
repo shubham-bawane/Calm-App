@@ -21,10 +21,13 @@ export default function SettingsScreen({ navigation }) {
     exportData, 
     clearAllData, 
     moodCalibration,
+    lastMoodInference,
+    habitProgress,
     saveMoodCalibration 
   } = useAppStore();
   
   const [isExporting, setIsExporting] = useState(false);
+  const [showDevInspector, setShowDevInspector] = useState(false);
 
   const handleNotificationToggle = (value) => {
     updateSettings({ notificationsEnabled: value });
