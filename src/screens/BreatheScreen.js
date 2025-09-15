@@ -86,6 +86,9 @@ export default function BreatheScreen({ navigation }) {
     setIsRunning(false);
     setShowStop(false);
     
+    // FIXED: Reset circle to resting state at session end
+    scale.value = withTiming(1.0, { duration: 1000 });
+    
     // Play completion chime if sound enabled
     if (settings.soundEnabled) {
       // Placeholder for chime sound
@@ -94,7 +97,7 @@ export default function BreatheScreen({ navigation }) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     
-    // Save completed session
+    // PRIVACY NOTE: Save completed session locally to AsyncStorage only
     const sessionDuration = Date.now() - sessionStartTime;
     await addBreathingSession({
       duration: sessionDuration,
