@@ -117,29 +117,48 @@ export default function BreatheScreen({ navigation }) {
     }
   };
 
-  // Complete breathing session
+  // FIXED: Complete breathing session with proper cleanup
   const completeBreathing = async () => {
+    if (__DEV__) console.warn('🎉 Completing breathing session');
+    
     setIsRunning(false);
     setShowStop(false);
     
-    // FIXED: Reset circle to resting state at session end
-    scale.value = withTiming(1.0, { duration: 1000 });
+    // FIXED: Ensure clean animation state on completion
+    cancelAnimation(scale);
+    cancelAnimation(opacity);
     
-    // Play completion chime if sound enabled
-    if (settings.soundEnabled) {
-      // Placeholder for chime sound
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } else {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // FIXED: Reset to resting state at session end
+    scale.value = withTiming(1.0, { 
+      duration: 1000,
+      easing: Easing.inOut(Easing.ease)
+    });
+    opacity.value = withTiming(0.8, { duration: 1000 });
+    
+    // FIXED: Proper haptic feedback for completion
+    try {
+      if (settings.soundEnabled && Platform.OS !== 'web') {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (error) {
+      if (__DEV__) console.warn('Completion haptic failed:', error);
     }
     
-    // PRIVACY NOTE: Save completed session locally to AsyncStorage only
+    // All user data persisted locally in AsyncStorage by design. No remote calls.
     const sessionDuration = Date.now() - sessionStartTime;
     await addBreathingSession({
       duration: sessionDuration,
       cycles: breathingConfig.cycles,
       completed: true,
     });
+    
+    if (__DEV__) {
+      console.warn('✅ Breathing session completed and saved locally:', {
+        duration: sessionDuration + 'ms',
+        cycles: breathingConfig.cycles,
+        storage: 'AsyncStorage'
+      });
+    }
     
     // Navigate to session summary
     navigation.navigate('SessionSummary', {
