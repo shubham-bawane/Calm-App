@@ -67,8 +67,8 @@ export default function HabitScreen({ navigation }) {
     
     setCompletingHabit(habitId);
     
-    // Haptic feedback
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // FIXED: Haptic feedback using haptics manager
+    await hapticsManager.triggerMedium();
     
     // Plant growth animation
     plantScale.value = withSequence(
