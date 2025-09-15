@@ -1,3 +1,12 @@
+/**
+ * HABIT TRACKER - PRIVACY-FIRST GENTLE HABITS
+ * 
+ * This screen implements a gentle habit tracking system with plant growth metaphor.
+ * ALL habit completion data is stored locally using AsyncStorage.
+ * NO external tracking, analytics, or social features.
+ * User maintains complete privacy and control over their wellness data.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
