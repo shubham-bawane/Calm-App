@@ -446,6 +446,11 @@ export default function BreatheScreen({ navigation }) {
         <View style={styles.instructionContainer}>
           <Text style={styles.phaseText}>{getPhaseText()}</Text>
           
+          {/* FIXED: Live countdown timer display */}
+          {isRunning && countdown > 0 && (
+            <Text style={styles.countdownText}>{getCountdownText()}</Text>
+          )}
+          
           {!isRunning && (
             <AnimatedButton
               onPress={startBreathing}
