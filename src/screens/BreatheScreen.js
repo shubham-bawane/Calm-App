@@ -130,7 +130,32 @@ export default function BreatheScreen({ navigation }) {
     });
   };
 
-  // Run single breathing cycle
+  // FIXED: Helper function for haptic feedback with settings check
+  const triggerInhaleHaptic = async () => {
+    if (settings.hapticsEnabled !== false) { // Default to enabled
+      try {
+        if (Platform.OS !== 'web') {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } catch (error) {
+        if (__DEV__) console.warn('Haptic feedback failed:', error);
+      }
+    }
+  };
+
+  const triggerExhaleHaptic = async () => {
+    if (settings.hapticsEnabled !== false) { // Default to enabled
+      try {
+        if (Platform.OS !== 'web') {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } catch (error) {
+        if (__DEV__) console.warn('Haptic feedback failed:', error);
+      }
+    }
+  };
+
+  // FIXED: Complete breathing cycle implementation using withSequence
   const runBreathingCycle = () => {
     if (currentCycle >= breathingConfig.cycles) {
       runOnJS(completeBreathing)();
@@ -141,57 +166,99 @@ export default function BreatheScreen({ navigation }) {
     if (currentCycle === 0) {
       setTimeout(() => {
         runOnJS(setShowStop)(true);
-      }, breathingConfig.inhale);
+      }, 1000); // Show after 1 second instead of full inhale duration
     }
 
-    // FIXED: Reset to baseline before starting each cycle
-    scale.value = withTiming(1.0, { duration: 500 }, () => {
-      // Inhale phase - expand circle
-      runOnJS(setCurrentPhase)(BREATHING_PHASES.INHALE);
-      scale.value = withTiming(1.18, {
-        duration: breathingConfig.inhale,
+    // FIXED: Debug logging in dev mode
+    if (__DEV__) {
+      console.warn(`🌊 Starting Breathing Cycle ${currentCycle + 1}/${breathingConfig.cycles}`, {
+        inhale: breathingConfig.inhale + 'ms',
+        hold: breathingConfig.hold + 'ms',
+        exhale: breathingConfig.exhale + 'ms',
+        reduceMotion: settings.reduceMotion
       });
-      
-      // Haptic feedback for inhale
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
 
-      setTimeout(() => {
-        if (!isRunning) return;
-        
-        // Hold phase - maintain size
-        runOnJS(setCurrentPhase)(BREATHING_PHASES.HOLD);
-        
-        setTimeout(() => {
-          if (!isRunning) return;
-          
-          // Exhale phase - contract circle
+    // Handle reduce motion setting - replace scale with opacity pulse
+    if (settings.reduceMotion) {
+      runReducedMotionCycle();
+      return;
+    }
+
+    // FIXED: Use withSequence for proper phase timing with explicit scale values
+    scale.value = withSequence(
+      // Phase 1: INHALE - scale from 1 -> 1.18 with cubic ease
+      withTiming(1.18, {
+        duration: breathingConfig.inhale,
+        easing: Easing.inOut(Easing.cubic)
+      }, (finished) => {
+        if (finished) {
+          runOnJS(setCurrentPhase)(BREATHING_PHASES.INHALE);
+          runOnJS(triggerInhaleHaptic)();
+          if (__DEV__) console.warn('🫁 Inhale phase complete');
+        }
+      }),
+      
+      // Phase 2: HOLD - maintain 1.18 for hold duration
+      withDelay(breathingConfig.hold, withTiming(1.18, { duration: 0 }, (finished) => {
+        if (finished) {
+          runOnJS(setCurrentPhase)(BREATHING_PHASES.HOLD);
+          if (__DEV__) console.warn('⏸️ Hold phase complete');
+        }
+      })),
+      
+      // Phase 3: EXHALE - scale from 1.18 -> 0.92 with quad ease out
+      withTiming(0.92, {
+        duration: breathingConfig.exhale,
+        easing: Easing.out(Easing.quad)
+      }, (finished) => {
+        if (finished) {
           runOnJS(setCurrentPhase)(BREATHING_PHASES.EXHALE);
-          scale.value = withTiming(0.92, {
-            duration: breathingConfig.exhale,
-          });
+          runOnJS(triggerExhaleHaptic)();
+          if (__DEV__) console.warn('🫁 Exhale phase complete');
+        }
+      }),
+      
+      // Phase 4: RETURN TO REST - scale back to 1.0
+      withTiming(1.0, {
+        duration: 800,
+        easing: Easing.inOut(Easing.ease)
+      }, (finished) => {
+        if (finished && isRunning) {
+          runOnJS(setCurrentPhase)(BREATHING_PHASES.PAUSE);
+          runOnJS(setCurrentCycle)(currentCycle + 1);
           
-          // Haptic feedback for exhale
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          
+          // Brief pause before next cycle
           setTimeout(() => {
-            if (!isRunning) return;
-            
-            // Return to resting state before next cycle
-            scale.value = withTiming(1.0, { duration: 1000 }, () => {
-              runOnJS(setCurrentPhase)(BREATHING_PHASES.PAUSE);
-              runOnJS(setCurrentCycle)(currentCycle + 1);
-              
-              // Brief pause before next cycle
-              setTimeout(() => {
-                if (isRunning) {
-                  runOnJS(runBreathingCycle)();
-                }
-              }, 500);
-            });
-          }, breathingConfig.exhale);
-        }, breathingConfig.hold);
-      }, breathingConfig.inhale);
-    });
+            if (isRunning) {
+              runOnJS(runBreathingCycle)();
+            }
+          }, 800);
+          
+          if (__DEV__) console.warn('✅ Cycle complete, returning to rest');
+        }
+      })
+    );
+  };
+
+  // FIXED: Reduced motion alternative - opacity pulse with timer
+  const runReducedMotionCycle = () => {
+    // Simple opacity pulse instead of scaling
+    opacity.value = withSequence(
+      withTiming(1.0, { duration: breathingConfig.inhale }),
+      withDelay(breathingConfig.hold, withTiming(1.0, { duration: 0 })),
+      withTiming(0.6, { duration: breathingConfig.exhale }),
+      withTiming(0.8, { duration: 800 }, (finished) => {
+        if (finished && isRunning) {
+          runOnJS(setCurrentCycle)(currentCycle + 1);
+          setTimeout(() => {
+            if (isRunning) {
+              runOnJS(runBreathingCycle)();
+            }
+          }, 800);
+        }
+      })
+    );
   };
 
   // Phase instruction text
