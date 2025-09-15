@@ -242,7 +242,7 @@ export default function MoodCalibrationScreen({ navigation }) {
     
     // PRIVACY: Save calibration results to local AsyncStorage only
     await saveMoodCalibration(result);
-    updateMoodInference(result);
+    await updateMoodInference(result);
     
     // FIXED: Debug logging in dev mode only
     if (__DEV__) {
