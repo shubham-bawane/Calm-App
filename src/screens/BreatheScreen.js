@@ -33,6 +33,7 @@ import { Audio } from 'expo-av';
 import AnimatedButton from '../components/AnimatedButton';
 import { theme, breathingConfig } from '../config/theme';
 import { useAppStore } from '../store/useAppStore';
+import { hapticsManager } from '../utils/hapticsManager';
 
 const { width, height } = Dimensions.get('window');
 
