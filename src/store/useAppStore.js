@@ -185,14 +185,16 @@ export const useAppStore = create((set, get) => ({
         breathingSessions: breathingSessions ? JSON.parse(breathingSessions) : [],
       });
       
-      // PRIVACY: Confirm all data loaded from local AsyncStorage only
-      console.log('📱 Data Loaded Locally:', {
-        source: 'AsyncStorage (LOCAL_ONLY)',
-        journalEntries: (journalEntries ? JSON.parse(journalEntries) : []).length,
-        habitLevel: loadedHabitProgress.level,
-        breathingSessions: (breathingSessions ? JSON.parse(breathingSessions) : []).length,
-        moodCalibrated: !!moodCalibration,
-      });
+      // FIXED: Debug logging in dev mode only
+      if (__DEV__) {
+        console.warn('📱 Data Loaded Locally:', {
+          source: 'AsyncStorage (LOCAL_ONLY)',
+          journalEntries: (journalEntries ? JSON.parse(journalEntries) : []).length,
+          habitLevel: loadedHabitProgress.level,
+          breathingSessions: (breathingSessions ? JSON.parse(breathingSessions) : []).length,
+          moodCalibrated: !!moodCalibration,
+        });
+      }
     } catch (error) {
       console.error('Error loading stored data:', error);
     }
