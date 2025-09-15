@@ -144,12 +144,15 @@ export default function BreatheScreen({ navigation }) {
 
   // FIXED: Complete breathing session with proper cleanup
   const completeBreathing = async () => {
-    if (__DEV__) console.warn('🎉 Completing breathing session');
+    if (__DEV__) console.warn('🎉 Completing breathing session - all cycles done');
     
     setIsRunning(false);
     setShowStop(false);
+    setCurrentPhase(BREATHING_PHASES.PAUSE);
+    setCountdown(0);
     
-    // FIXED: Ensure clean animation state on completion
+    // FIXED: Clear all timers and animations
+    clearAllTimers();
     cancelAnimation(scale);
     cancelAnimation(opacity);
     
@@ -160,7 +163,7 @@ export default function BreatheScreen({ navigation }) {
     });
     opacity.value = withTiming(0.8, { duration: 1000 });
     
-    // FIXED: Proper haptic feedback for completion using haptics manager
+    // FIXED: Proper haptic feedback for completion
     if (settings.soundEnabled) {
       await hapticsManager.triggerSuccess(settings.hapticsEnabled !== false);
     }
@@ -168,6 +171,7 @@ export default function BreatheScreen({ navigation }) {
     // All user data persisted locally in AsyncStorage by design. No remote calls.
     const sessionDuration = Date.now() - sessionStartTime;
     await addBreathingSession({
+      date: new Date().toISOString(),
       duration: sessionDuration,
       cycles: breathingConfig.cycles,
       completed: true,
