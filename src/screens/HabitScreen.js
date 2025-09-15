@@ -412,4 +412,19 @@ const styles = StyleSheet.create({
     color: theme.colors.mutedText,
     opacity: 0.7,
   },
+  // FIXED: Dev debug styles
+  devDebug: {
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  devDebugText: {
+    ...theme.typography.small,
+    color: theme.colors.accent,
+    fontFamily: 'monospace',
+    marginBottom: theme.spacing.xs,
+  },
 });
