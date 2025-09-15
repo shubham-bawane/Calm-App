@@ -94,15 +94,17 @@ export default function BreatheScreen({ navigation }) {
     runBreathingCycle();
   };
 
-  // FIXED: Stop breathing session with proper cleanup
+  // FIXED: Stop breathing session with complete cleanup
   const stopBreathing = async () => {
     if (__DEV__) console.warn('🛑 Stopping breathing session');
     
     setIsRunning(false);
     setShowStop(false);
     setCurrentPhase(BREATHING_PHASES.PAUSE);
+    setCountdown(0);
     
-    // FIXED: Cancel any running animations to prevent memory leaks
+    // FIXED: Clear all timers and animations to prevent memory leaks
+    clearAllTimers();
     cancelAnimation(scale);
     cancelAnimation(opacity);
     
@@ -117,6 +119,7 @@ export default function BreatheScreen({ navigation }) {
     if (sessionStartTime) {
       const sessionDuration = Date.now() - sessionStartTime;
       await addBreathingSession({
+        date: new Date().toISOString(),
         duration: sessionDuration,
         cycles: currentCycle,
         completed: currentCycle >= breathingConfig.cycles,
