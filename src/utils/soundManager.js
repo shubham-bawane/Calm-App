@@ -102,29 +102,17 @@ class SoundManager {
     }
   }
 
-  // Placeholder sounds using haptic feedback
+  // FIXED: Placeholder sounds using centralized haptics manager
   async playChime() {
-    try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      console.warn('Failed to play chime haptic:', error);
-    }
+    await hapticsManager.triggerSuccess();
   }
 
   async playBreathInhale() {
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch (error) {
-      console.warn('Failed to play inhale haptic:', error);
-    }
+    await hapticsManager.triggerInhaleHaptic();
   }
 
   async playBreathExhale() {
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch (error) {
-      console.warn('Failed to play exhale haptic:', error);
-    }
+    await hapticsManager.triggerExhaleHaptic();
   }
 
   async playAmbientOcean() {
