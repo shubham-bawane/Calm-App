@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Dimensions,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
