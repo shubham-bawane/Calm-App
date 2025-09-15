@@ -180,6 +180,18 @@ export default function HabitScreen({ navigation }) {
             <Text style={styles.progressText}>
               {habitProgress.growthPoints % 10} / 10 to next level
             </Text>
+            
+            {/* FIXED: Dev-only growth points debug display */}
+            {__DEV__ && (
+              <View style={styles.devDebug}>
+                <Text style={styles.devDebugText}>
+                  🛠️ DEV: Total Growth Points: {habitProgress.growthPoints}
+                </Text>
+                <Text style={styles.devDebugText}>
+                  💾 Storage: AsyncStorage (@calmapp:habits)
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
