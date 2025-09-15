@@ -64,16 +64,28 @@ export const useAppStore = create((set, get) => ({
     const today = new Date().toDateString();
     const currentProgress = get().habitProgress;
     
+    // PRIVACY: Habit completions are private, stored on-device in AsyncStorage only
     if (!currentProgress.completedToday.includes(habitId)) {
       const updatedProgress = {
         ...currentProgress,
         completedToday: [...currentProgress.completedToday, habitId],
         growthPoints: currentProgress.growthPoints + 1,
         level: Math.floor((currentProgress.growthPoints + 1) / 10) + 1,
+        lastCompletedDate: today, // Track when last completed
       };
       
+      // Update state and persist immediately to AsyncStorage
       set({ habitProgress: updatedProgress });
       await AsyncStorage.setItem(STORAGE_KEYS.HABIT_PROGRESS, JSON.stringify(updatedProgress));
+      
+      // DEBUG: Verify habit completion is working and stored locally
+      console.log('🌱 Habit Completed:', {
+        habitId,
+        growthPoints: updatedProgress.growthPoints,
+        level: updatedProgress.level,
+        storage: 'LOCAL_ONLY (AsyncStorage)',
+        completedToday: updatedProgress.completedToday.length + ' habits today'
+      });
     }
   },
 
