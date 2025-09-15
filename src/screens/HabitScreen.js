@@ -24,10 +24,10 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 import AnimatedButton from '../components/AnimatedButton';
 import { theme } from '../config/theme';
 import { useAppStore } from '../store/useAppStore';
+import { hapticsManager } from '../utils/hapticsManager';
 
 const HABITS = [
   {
