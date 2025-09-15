@@ -7,8 +7,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 import { theme } from '../config/theme';
+import { hapticsManager } from '../utils/hapticsManager';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
