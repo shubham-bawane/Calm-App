@@ -23,6 +23,7 @@ export default function SettingsScreen({ navigation }) {
     moodCalibration,
     lastMoodInference,
     habitProgress,
+    breathingSessions,
     saveMoodCalibration 
   } = useAppStore();
   
