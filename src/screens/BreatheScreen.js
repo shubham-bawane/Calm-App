@@ -154,13 +154,9 @@ export default function BreatheScreen({ navigation }) {
     });
     opacity.value = withTiming(0.8, { duration: 1000 });
     
-    // FIXED: Proper haptic feedback for completion
-    try {
-      if (settings.soundEnabled && Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    } catch (error) {
-      if (__DEV__) console.warn('Completion haptic failed:', error);
+    // FIXED: Proper haptic feedback for completion using haptics manager
+    if (settings.soundEnabled) {
+      await hapticsManager.triggerSuccess(settings.hapticsEnabled !== false);
     }
     
     // All user data persisted locally in AsyncStorage by design. No remote calls.
