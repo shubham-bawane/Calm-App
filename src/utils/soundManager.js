@@ -1,5 +1,5 @@
 import { Audio } from 'expo-av';
-import * as Haptics from 'expo-haptics';
+import { hapticsManager } from './hapticsManager';
 
 class SoundManager {
   constructor() {
