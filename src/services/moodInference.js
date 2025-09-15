@@ -411,6 +411,7 @@ class MoodInferenceService {
     const features = this.extractFeatures();
     const moodResult = this.inferMood(features);
     
+    // PRIVACY: All calibration data stored locally in memory and AsyncStorage only
     this.calibrationData = {
       timestamp: Date.now(),
       features,
@@ -418,6 +419,14 @@ class MoodInferenceService {
     };
     
     this.lastMoodResult = moodResult;
+    
+    // DEBUG LOG: Verify mood inference is working
+    console.log('🧠 Mood Calibration Complete:', {
+      mood: moodResult.mood,
+      confidence: Math.round(moodResult.confidence * 100) + '%',
+      features: Object.keys(features).length + ' features extracted',
+      storage: 'LOCAL_ONLY (AsyncStorage)'
+    });
     
     return moodResult;
   }
