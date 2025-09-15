@@ -372,22 +372,14 @@ export default function BreatheScreen({ navigation }) {
     timerRefs.current.push(inhaleTimer);
   };
 
-  // FIXED: Phase instruction text with reduce motion timer support
+  // FIXED: Phase instruction text with live countdown timer
   const getPhaseText = () => {
-    if (settings.reduceMotion && isRunning) {
-      // Show numeric countdown timer in reduce motion mode
-      const cycleProgress = `Cycle ${currentCycle + 1} of ${breathingConfig.cycles}`;
-      switch (currentPhase) {
-        case BREATHING_PHASES.INHALE:
-          return `${cycleProgress}\nBreathe in (${Math.ceil(breathingConfig.inhale / 1000)}s)`;
-        case BREATHING_PHASES.HOLD:
-          return `${cycleProgress}\nHold (${Math.ceil(breathingConfig.hold / 1000)}s)`;
-        case BREATHING_PHASES.EXHALE:
-          return `${cycleProgress}\nBreathe out (${Math.ceil(breathingConfig.exhale / 1000)}s)`;
-        default:
-          return cycleProgress;
-      }
+    if (!isRunning) {
+      return 'Tap to begin';
     }
+    
+    // Show cycle progress
+    const cycleProgress = `Cycle ${currentCycle + 1} of ${breathingConfig.cycles}`;
     
     switch (currentPhase) {
       case BREATHING_PHASES.INHALE:
@@ -396,9 +388,25 @@ export default function BreatheScreen({ navigation }) {
         return 'Hold';
       case BREATHING_PHASES.EXHALE:
         return 'Breathe out';
+      case BREATHING_PHASES.PAUSE:
+        return cycleProgress;
       default:
-        return 'Tap to begin';
+        return cycleProgress;
     }
+  };
+
+  // FIXED: Live countdown display
+  const getCountdownText = () => {
+    if (!isRunning || countdown <= 0) return '';
+    
+    const phaseLabels = {
+      [BREATHING_PHASES.INHALE]: 'Inhale',
+      [BREATHING_PHASES.HOLD]: 'Hold',
+      [BREATHING_PHASES.EXHALE]: 'Exhale',
+    };
+    
+    const label = phaseLabels[currentPhase] || '';
+    return `${label}: ${countdown}s`;
   };
 
   return (
