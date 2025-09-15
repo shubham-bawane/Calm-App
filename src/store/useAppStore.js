@@ -17,12 +17,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * User has full control and can export/delete all data.
  */
 
+// FIXED: Use consistent AsyncStorage keys with app prefix
 const STORAGE_KEYS = {
-  JOURNAL_ENTRIES: 'journal_entries',
-  HABIT_PROGRESS: 'habit_progress',
-  SETTINGS: 'settings',
-  MOOD_CALIBRATION: 'mood_calibration',
-  BREATHING_SESSIONS: 'breathing_sessions',
+  JOURNAL_ENTRIES: '@calmapp:journal_entries',
+  HABIT_PROGRESS: '@calmapp:habits',
+  SETTINGS: '@calmapp:settings',
+  MOOD_CALIBRATION: '@calmapp:moodCalibration',
+  BREATHING_SESSIONS: '@calmapp:breathing_sessions',
+  GROWTH_POINTS: '@calmapp:growth', // Separate key for growth points
 };
 
 export const useAppStore = create((set, get) => ({
