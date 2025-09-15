@@ -59,11 +59,28 @@ export default function BreatheScreen({ navigation }) {
   // Animation refs for cleanup
   const animationRefs = React.useRef([]);
 
-  // Animated styles for breathing circle
-  const breathingStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
+  // FIXED: Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (__DEV__) console.warn('🧹 Cleaning up breathing screen');
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
+    };
+  }, []);
+
+  // FIXED: Animated styles for breathing circle with reduce motion support
+  const breathingStyle = useAnimatedStyle(() => {
+    if (settings.reduceMotion) {
+      return {
+        transform: [{ scale: 1 }], // No scaling in reduce motion mode
+        opacity: opacity.value,
+      };
+    }
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
 
   // Start breathing session
   const startBreathing = async () => {
