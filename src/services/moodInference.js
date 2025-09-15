@@ -1,5 +1,18 @@
 import { moodInferenceConfig } from '../config/theme';
 
+/**
+ * PRIVACY-FIRST MOOD INFERENCE SERVICE
+ * 
+ * This service analyzes touch patterns (tap speed, hold duration, swipe smoothness, 
+ * stroke complexity) to infer emotional state using local heuristic algorithms.
+ * 
+ * CRITICAL PRIVACY GUARANTEES:
+ * - ALL touch data and mood analysis stays LOCAL on device
+ * - NO data is sent to external servers or analytics
+ * - Raw touch data is processed locally and can be deleted at any time
+ * - Mood inference uses mathematical heuristics, not cloud AI
+ * - User controls all calibration data through app settings
+ */
 class MoodInferenceService {
   constructor() {
     this.calibrationData = null;
