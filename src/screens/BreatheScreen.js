@@ -72,14 +72,26 @@ export default function BreatheScreen({ navigation }) {
     runBreathingCycle();
   };
 
-  // Stop breathing session
+  // FIXED: Stop breathing session with proper cleanup
   const stopBreathing = async () => {
+    if (__DEV__) console.warn('🛑 Stopping breathing session');
+    
     setIsRunning(false);
     setShowStop(false);
     setCurrentPhase(BREATHING_PHASES.PAUSE);
-    scale.value = withTiming(1, { duration: 500 });
     
-    // Save session data
+    // FIXED: Cancel any running animations to prevent memory leaks
+    cancelAnimation(scale);
+    cancelAnimation(opacity);
+    
+    // FIXED: Immediately reset to resting state
+    scale.value = withTiming(1, { 
+      duration: 500,
+      easing: Easing.inOut(Easing.ease)
+    });
+    opacity.value = withTiming(0.8, { duration: 500 });
+    
+    // All user data persisted locally in AsyncStorage by design. No remote calls.
     if (sessionStartTime) {
       const sessionDuration = Date.now() - sessionStartTime;
       await addBreathingSession({
@@ -87,6 +99,14 @@ export default function BreatheScreen({ navigation }) {
         cycles: currentCycle,
         completed: currentCycle >= breathingConfig.cycles,
       });
+      
+      if (__DEV__) {
+        console.warn('💾 Breathing session saved locally:', {
+          duration: sessionDuration + 'ms',
+          cycles: currentCycle,
+          storage: 'AsyncStorage'
+        });
+      }
       
       // Navigate to session summary
       navigation.navigate('SessionSummary', {
