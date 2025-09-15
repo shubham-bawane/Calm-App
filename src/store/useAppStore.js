@@ -96,14 +96,16 @@ export const useAppStore = create((set, get) => ({
       set({ habitProgress: updatedProgress });
       await AsyncStorage.setItem(STORAGE_KEYS.HABIT_PROGRESS, JSON.stringify(updatedProgress));
       
-      // DEBUG: Verify habit completion is working and stored locally
-      console.log('🌱 Habit Completed:', {
-        habitId,
-        growthPoints: updatedProgress.growthPoints,
-        level: updatedProgress.level,
-        storage: 'LOCAL_ONLY (AsyncStorage)',
-        completedToday: updatedProgress.completedToday.length + ' habits today'
-      });
+      // FIXED: Debug logging in dev mode only
+      if (__DEV__) {
+        console.warn('🌱 Habit Completed:', {
+          habitId,
+          growthPoints: updatedProgress.growthPoints,
+          level: updatedProgress.level,
+          storage: 'LOCAL_ONLY (AsyncStorage)',
+          completedToday: updatedProgress.completedToday.length + ' habits today'
+        });
+      }
     }
   },
 
