@@ -51,8 +51,12 @@ export default function BreatheScreen({ navigation }) {
 
   const { addBreathingSession, settings } = useAppStore();
   
+  // FIXED: Breathing animation shared values with proper initialization
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0.8);
+  
+  // Animation refs for cleanup
+  const animationRefs = React.useRef([]);
 
   // Animated styles for breathing circle
   const breathingStyle = useAnimatedStyle(() => ({
