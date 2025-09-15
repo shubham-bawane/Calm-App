@@ -196,21 +196,48 @@ export default function BreatheScreen({ navigation }) {
     await hapticsManager.triggerExhaleHaptic(settings.hapticsEnabled !== false);
   };
 
-  // FIXED: Complete breathing cycle implementation using withSequence
+  // FIXED: Clear all timers helper
+  const clearAllTimers = () => {
+    timerRefs.current.forEach(timer => clearTimeout(timer));
+    timerRefs.current = [];
+    if (countdownInterval.current) {
+      clearInterval(countdownInterval.current);
+      countdownInterval.current = null;
+    }
+  };
+
+  // FIXED: Live countdown timer for each phase
+  const startCountdown = (phase, duration) => {
+    let timeLeft = Math.ceil(duration / 1000);
+    setCountdown(timeLeft);
+    
+    countdownInterval.current = setInterval(() => {
+      timeLeft -= 1;
+      setCountdown(timeLeft);
+      
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval.current);
+        countdownInterval.current = null;
+      }
+    }, 1000);
+  };
+
+  // FIXED: Complete breathing cycle implementation with proper multi-cycle loop
   const runBreathingCycle = () => {
     if (currentCycle >= breathingConfig.cycles) {
-      runOnJS(completeBreathing)();
+      completeBreathing();
       return;
     }
 
     // Show stop button after first cycle starts
     if (currentCycle === 0) {
-      setTimeout(() => {
-        runOnJS(setShowStop)(true);
-      }, 1000); // Show after 1 second instead of full inhale duration
+      const timer = setTimeout(() => {
+        setShowStop(true);
+      }, 1000);
+      timerRefs.current.push(timer);
     }
 
-    // FIXED: Debug logging in dev mode
+    // FIXED: Debug logging with proper cycle numbers
     if (__DEV__) {
       console.warn(`🌊 Starting Breathing Cycle ${currentCycle + 1}/${breathingConfig.cycles}`, {
         inhale: breathingConfig.inhale + 'ms',
@@ -220,86 +247,121 @@ export default function BreatheScreen({ navigation }) {
       });
     }
 
-    // Handle reduce motion setting - replace scale with opacity pulse
+    // Handle reduce motion setting
     if (settings.reduceMotion) {
       runReducedMotionCycle();
       return;
     }
 
-    // FIXED: Use withSequence for proper phase timing with explicit scale values
-    scale.value = withSequence(
-      // Phase 1: INHALE - scale from 1 -> 1.18 with cubic ease
-      withTiming(1.18, {
-        duration: breathingConfig.inhale,
-        easing: Easing.inOut(Easing.cubic)
-      }, (finished) => {
-        if (finished) {
-          runOnJS(setCurrentPhase)(BREATHING_PHASES.INHALE);
-          runOnJS(triggerInhaleHaptic)();
-          if (__DEV__) console.warn('🫁 Inhale phase complete');
-        }
-      }),
+    // PHASE 1: INHALE
+    setCurrentPhase(BREATHING_PHASES.INHALE);
+    startCountdown(BREATHING_PHASES.INHALE, breathingConfig.inhale);
+    triggerInhaleHaptic();
+    
+    scale.value = withTiming(1.18, {
+      duration: breathingConfig.inhale,
+      easing: Easing.inOut(Easing.cubic)
+    });
+
+    const inhaleTimer = setTimeout(() => {
+      if (!isRunning) return;
       
-      // Phase 2: HOLD - maintain 1.18 for hold duration
-      withDelay(breathingConfig.hold, withTiming(1.18, { duration: 0 }, (finished) => {
-        if (finished) {
-          runOnJS(setCurrentPhase)(BREATHING_PHASES.HOLD);
-          if (__DEV__) console.warn('⏸️ Hold phase complete');
-        }
-      })),
+      // PHASE 2: HOLD
+      setCurrentPhase(BREATHING_PHASES.HOLD);
+      startCountdown(BREATHING_PHASES.HOLD, breathingConfig.hold);
       
-      // Phase 3: EXHALE - scale from 1.18 -> 0.92 with quad ease out
-      withTiming(0.92, {
-        duration: breathingConfig.exhale,
-        easing: Easing.out(Easing.quad)
-      }, (finished) => {
-        if (finished) {
-          runOnJS(setCurrentPhase)(BREATHING_PHASES.EXHALE);
-          runOnJS(triggerExhaleHaptic)();
-          if (__DEV__) console.warn('🫁 Exhale phase complete');
-        }
-      }),
+      if (__DEV__) console.warn('⏸️ Hold phase started');
       
-      // Phase 4: RETURN TO REST - scale back to 1.0
-      withTiming(1.0, {
-        duration: 800,
-        easing: Easing.inOut(Easing.ease)
-      }, (finished) => {
-        if (finished && isRunning) {
-          runOnJS(setCurrentPhase)(BREATHING_PHASES.PAUSE);
-          runOnJS(setCurrentCycle)(currentCycle + 1);
+      const holdTimer = setTimeout(() => {
+        if (!isRunning) return;
+        
+        // PHASE 3: EXHALE
+        setCurrentPhase(BREATHING_PHASES.EXHALE);
+        startCountdown(BREATHING_PHASES.EXHALE, breathingConfig.exhale);
+        triggerExhaleHaptic();
+        
+        scale.value = withTiming(0.92, {
+          duration: breathingConfig.exhale,
+          easing: Easing.out(Easing.quad)
+        });
+        
+        if (__DEV__) console.warn('🫁 Exhale phase started');
+        
+        const exhaleTimer = setTimeout(() => {
+          if (!isRunning) return;
+          
+          // PHASE 4: RETURN TO REST & NEXT CYCLE
+          setCurrentPhase(BREATHING_PHASES.PAUSE);
+          setCountdown(0);
+          
+          scale.value = withTiming(1.0, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease)
+          });
+          
+          // Increment cycle counter
+          setCurrentCycle(prev => prev + 1);
+          
+          if (__DEV__) console.warn(`✅ Cycle ${currentCycle + 1} complete`);
           
           // Brief pause before next cycle
-          setTimeout(() => {
+          const pauseTimer = setTimeout(() => {
             if (isRunning) {
-              runOnJS(runBreathingCycle)();
+              runBreathingCycle();
             }
           }, 800);
-          
-          if (__DEV__) console.warn('✅ Cycle complete, returning to rest');
-        }
-      })
-    );
+          timerRefs.current.push(pauseTimer);
+        }, breathingConfig.exhale);
+        timerRefs.current.push(exhaleTimer);
+      }, breathingConfig.hold);
+      timerRefs.current.push(holdTimer);
+    }, breathingConfig.inhale);
+    timerRefs.current.push(inhaleTimer);
   };
 
-  // FIXED: Reduced motion alternative - opacity pulse with timer
+  // FIXED: Reduced motion alternative with countdown
   const runReducedMotionCycle = () => {
-    // Simple opacity pulse instead of scaling
-    opacity.value = withSequence(
-      withTiming(1.0, { duration: breathingConfig.inhale }),
-      withDelay(breathingConfig.hold, withTiming(1.0, { duration: 0 })),
-      withTiming(0.6, { duration: breathingConfig.exhale }),
-      withTiming(0.8, { duration: 800 }, (finished) => {
-        if (finished && isRunning) {
-          runOnJS(setCurrentCycle)(currentCycle + 1);
-          setTimeout(() => {
+    // PHASE 1: INHALE
+    setCurrentPhase(BREATHING_PHASES.INHALE);
+    startCountdown(BREATHING_PHASES.INHALE, breathingConfig.inhale);
+    opacity.value = withTiming(1.0, { duration: breathingConfig.inhale });
+    
+    const inhaleTimer = setTimeout(() => {
+      if (!isRunning) return;
+      
+      // PHASE 2: HOLD
+      setCurrentPhase(BREATHING_PHASES.HOLD);
+      startCountdown(BREATHING_PHASES.HOLD, breathingConfig.hold);
+      
+      const holdTimer = setTimeout(() => {
+        if (!isRunning) return;
+        
+        // PHASE 3: EXHALE
+        setCurrentPhase(BREATHING_PHASES.EXHALE);
+        startCountdown(BREATHING_PHASES.EXHALE, breathingConfig.exhale);
+        opacity.value = withTiming(0.6, { duration: breathingConfig.exhale });
+        
+        const exhaleTimer = setTimeout(() => {
+          if (!isRunning) return;
+          
+          // RETURN TO REST & NEXT CYCLE
+          setCurrentPhase(BREATHING_PHASES.PAUSE);
+          setCountdown(0);
+          opacity.value = withTiming(0.8, { duration: 800 });
+          setCurrentCycle(prev => prev + 1);
+          
+          const pauseTimer = setTimeout(() => {
             if (isRunning) {
-              runOnJS(runBreathingCycle)();
+              runBreathingCycle();
             }
           }, 800);
-        }
-      })
-    );
+          timerRefs.current.push(pauseTimer);
+        }, breathingConfig.exhale);
+        timerRefs.current.push(exhaleTimer);
+      }, breathingConfig.hold);
+      timerRefs.current.push(holdTimer);
+    }, breathingConfig.inhale);
+    timerRefs.current.push(inhaleTimer);
   };
 
   // FIXED: Phase instruction text with reduce motion timer support
