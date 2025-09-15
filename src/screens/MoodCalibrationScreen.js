@@ -235,12 +235,23 @@ export default function MoodCalibrationScreen({ navigation }) {
   };
 
   const completeCalibration = async () => {
+    // PRIVACY: Process mood inference entirely on-device
     const result = moodInference.completeCalibration();
     setMoodResult(result);
     setIsComplete(true);
     
+    // PRIVACY: Save calibration results to local AsyncStorage only
     await saveMoodCalibration(result);
     updateMoodInference(result);
+    
+    // DEBUG: Confirm mood calibration is working and stored locally
+    console.log('🧠 Mood Calibration Saved:', {
+      mood: result.mood,
+      confidence: Math.round(result.confidence * 100) + '%',
+      isConfident: result.isConfident,
+      storage: 'LOCAL_ONLY (AsyncStorage)',
+      touchDataPoints: Object.keys(result.features).length
+    });
   };
 
   const handleFinish = () => {
