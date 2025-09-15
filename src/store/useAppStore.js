@@ -124,12 +124,35 @@ export const useAppStore = create((set, get) => ({
         AsyncStorage.getItem(STORAGE_KEYS.BREATHING_SESSIONS),
       ]);
 
+      // FIXED: Reset daily habit completions if it's a new day
+      const today = new Date().toDateString();
+      let loadedHabitProgress = habitProgress ? JSON.parse(habitProgress) : get().habitProgress;
+      
+      if (loadedHabitProgress.lastCompletedDate !== today) {
+        loadedHabitProgress = {
+          ...loadedHabitProgress,
+          completedToday: [], // Reset daily completions
+          lastCompletedDate: today,
+        };
+        // Save the reset state
+        await AsyncStorage.setItem(STORAGE_KEYS.HABIT_PROGRESS, JSON.stringify(loadedHabitProgress));
+      }
+
       set({
         settings: settings ? JSON.parse(settings) : get().settings,
         journalEntries: journalEntries ? JSON.parse(journalEntries) : [],
-        habitProgress: habitProgress ? JSON.parse(habitProgress) : get().habitProgress,
+        habitProgress: loadedHabitProgress,
         moodCalibration: moodCalibration ? JSON.parse(moodCalibration) : null,
         breathingSessions: breathingSessions ? JSON.parse(breathingSessions) : [],
+      });
+      
+      // PRIVACY: Confirm all data loaded from local AsyncStorage only
+      console.log('📱 Data Loaded Locally:', {
+        source: 'AsyncStorage (LOCAL_ONLY)',
+        journalEntries: (journalEntries ? JSON.parse(journalEntries) : []).length,
+        habitLevel: loadedHabitProgress.level,
+        breathingSessions: (breathingSessions ? JSON.parse(breathingSessions) : []).length,
+        moodCalibrated: !!moodCalibration,
       });
     } catch (error) {
       console.error('Error loading stored data:', error);
