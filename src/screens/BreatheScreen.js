@@ -318,8 +318,23 @@ export default function BreatheScreen({ navigation }) {
     );
   };
 
-  // Phase instruction text
+  // FIXED: Phase instruction text with reduce motion timer support
   const getPhaseText = () => {
+    if (settings.reduceMotion && isRunning) {
+      // Show numeric countdown timer in reduce motion mode
+      const cycleProgress = `Cycle ${currentCycle + 1} of ${breathingConfig.cycles}`;
+      switch (currentPhase) {
+        case BREATHING_PHASES.INHALE:
+          return `${cycleProgress}\nBreathe in (${Math.ceil(breathingConfig.inhale / 1000)}s)`;
+        case BREATHING_PHASES.HOLD:
+          return `${cycleProgress}\nHold (${Math.ceil(breathingConfig.hold / 1000)}s)`;
+        case BREATHING_PHASES.EXHALE:
+          return `${cycleProgress}\nBreathe out (${Math.ceil(breathingConfig.exhale / 1000)}s)`;
+        default:
+          return cycleProgress;
+      }
+    }
+    
     switch (currentPhase) {
       case BREATHING_PHASES.INHALE:
         return 'Breathe in';
